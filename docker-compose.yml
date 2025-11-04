@@ -1,0 +1,46 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: laravel_api
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/sites-available/default
+      - ./docker/supervisor/supervisord.conf:/etc/supervisor/conf.d/supervisord.conf
+    ports:
+      - "8000:80"
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_CONNECTION=sqlite
+    networks:
+      - laravel
+
+  # Optional: MySQL Database (if you want to use MySQL instead of SQLite)
+  # Uncomment this section if needed
+  # mysql:
+  #   image: mysql:8.0
+  #   container_name: laravel_mysql
+  #   restart: unless-stopped
+  #   environment:
+  #     MYSQL_DATABASE: laravel
+  #     MYSQL_ROOT_PASSWORD: secret
+  #     MYSQL_PASSWORD: secret
+  #     MYSQL_USER: laravel
+  #   volumes:
+  #     - mysql_data:/var/lib/mysql
+  #   ports:
+  #     - "3306:3306"
+  #   networks:
+  #     - laravel
+
+networks:
+  laravel:
+    driver: bridge
+
+# volumes:
+#   mysql_data:
+#     driver: local
