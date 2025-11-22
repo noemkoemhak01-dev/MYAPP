@@ -7,6 +7,9 @@ WORKDIR /var/www/html
 RUN apt-get update && apt-get install -y \
     git \
     curl \
+    ca-certificates \
+    gnupg \
+    build-essential \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
@@ -29,10 +32,21 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # Copy application files
 COPY . /var/www/html
 
+# Install Node.js (Node 20) from NodeSource and build frontend assets
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && cd /var/www/html \
+    && if [ -f package.json ]; then npm install --unsafe-perm && npm run build || true; fi
+
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage \
     && chmod -R 755 /var/www/html/bootstrap/cache
+
+# Install composer dependencies
+# Allow git to operate on the mounted repo when ownership differs
+# (prevents "dubious ownership" errors during composer operations)
+RUN git config --global --add safe.directory /var/www/html || true
 
 # Install composer dependencies
 RUN composer install --no-interaction --optimize-autoloader

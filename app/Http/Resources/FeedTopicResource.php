@@ -2,21 +2,21 @@
 
 namespace App\Http\Resources;
 
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class CategoryResource extends JsonResource
+class FeedTopicResource extends JsonResource
 {
-    public function toArray(Request $request): array
+    public function toArray($request): array
     {
         return [
             'id' => (string) $this->id,
             'name' => $this->name,
             'slug' => $this->slug,
             'icon' => $this->icon,
-            'subtitle' => $this->articles_count . ' articles',
-            'articles_count' => $this->articles_count ?? 0,
+            'category' => $this->category,
             'description' => $this->description,
+            'isFeatured' => (bool) $this->is_featured,
+            'trendScore' => (int) $this->trend_score,
         ];
     }
 }

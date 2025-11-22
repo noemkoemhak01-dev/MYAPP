@@ -4,38 +4,35 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Notification extends Model
 {
     use HasFactory;
+
+    protected $table = 'user_notifications';
 
     protected $fillable = [
         'user_id',
         'title',
         'message',
         'type',
-        'is_read',
+        'data',
+        'read_at',
     ];
 
     protected $casts = [
-        'is_read' => 'boolean',
+        'data' => 'array',
+        'read_at' => 'datetime',
     ];
 
-    // Relationships
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    // Scopes
     public function scopeUnread($query)
     {
-        return $query->where('is_read', false);
-    }
-
-    // Methods
-    public function markAsRead()
-    {
-        $this->update(['is_read' => true]);
+        return $query->whereNull('read_at');
     }
 }

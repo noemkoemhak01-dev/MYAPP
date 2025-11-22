@@ -14,10 +14,11 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'password',
         'phone',
         'avatar',
-        'password',
-        'is_admin',
+        'bio',
+        'role',
     ];
 
     protected $hidden = [
@@ -28,13 +29,20 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
-        'is_admin' => 'boolean',
     ];
 
-    // Relationships
-    public function articles()
+    protected $appends = [
+        'is_admin',
+    ];
+
+    public function getIsAdminAttribute(): bool
     {
-        return $this->hasMany(Article::class, 'author_id');
+        return $this->role === 'admin';
+    }
+
+    public function feedPosts()
+    {
+        return $this->hasMany(FeedPost::class);
     }
 
     public function bookmarks()
@@ -42,13 +50,19 @@ class User extends Authenticatable
         return $this->hasMany(Bookmark::class);
     }
 
-    public function bookmarkedArticles()
+    public function bookmarkedPosts()
     {
-        return $this->belongsToMany(Article::class, 'bookmarks');
+        return $this->belongsToMany(FeedPost::class, 'bookmarks')
+            ->withTimestamps();
     }
 
     public function notifications()
     {
         return $this->hasMany(Notification::class);
+    }
+
+    public function dashboardSnapshots()
+    {
+        return $this->hasMany(DashboardSnapshot::class);
     }
 }

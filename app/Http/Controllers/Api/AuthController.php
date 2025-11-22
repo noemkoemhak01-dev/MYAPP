@@ -9,7 +9,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -41,13 +40,9 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'success' => true,
-            'message' => 'User registered successfully',
-            'data' => [
-                'user' => new UserResource($user),
-                'token' => $token,
-                'token_type' => 'Bearer',
-            ]
+            'token' => $token,
+            'token_type' => 'Bearer',
+            'user' => new UserResource($user),
         ], 201);
     }
 
@@ -80,13 +75,9 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'success' => true,
-            'message' => 'Login successful',
-            'data' => [
-                'user' => new UserResource($user),
-                'token' => $token,
-                'token_type' => 'Bearer',
-            ]
+            'token' => $token,
+            'token_type' => 'Bearer',
+            'user' => new UserResource($user),
         ]);
     }
 
@@ -96,8 +87,7 @@ class AuthController extends Controller
     public function me(Request $request)
     {
         return response()->json([
-            'success' => true,
-            'data' => new UserResource($request->user())
+            'user' => new UserResource($request->user())
         ]);
     }
 
@@ -106,7 +96,10 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        $request->user()->currentAccessToken()->delete();
+        $token = $request->user()->currentAccessToken();
+        if ($token) {
+            $token->delete();
+        }
 
         return response()->json([
             'success' => true,
@@ -125,12 +118,8 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'success' => true,
-            'message' => 'Token refreshed successfully',
-            'data' => [
-                'token' => $token,
-                'token_type' => 'Bearer',
-            ]
+            'token' => $token,
+            'token_type' => 'Bearer',
         ]);
     }
 
@@ -160,7 +149,7 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Profile updated successfully',
-            'data' => new UserResource($user)
+            'user' => new UserResource($user)
         ]);
     }
 
@@ -195,9 +184,8 @@ class AuthController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Avatar uploaded successfully',
-            'data' => [
-                'avatar_url' => url('storage/' . $path)
-            ]
+            'avatar_url' => url('storage/' . $path),
+            'user' => new UserResource($user),
         ]);
     }
 }
