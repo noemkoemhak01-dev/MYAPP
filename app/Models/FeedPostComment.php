@@ -6,14 +6,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Bookmark extends Model
+class FeedPostComment extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
         'feed_post_id',
-        'source',
+        'user_id',
+        'parent_id',
+        'author_name',
+        'author_avatar',
+        'body',
     ];
 
     public function post(): BelongsTo
@@ -24,5 +27,10 @@ class Bookmark extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'parent_id');
     }
 }

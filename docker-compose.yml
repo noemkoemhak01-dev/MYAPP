@@ -15,32 +15,53 @@ services:
     environment:
       - APP_ENV=local
       - APP_DEBUG=true
-      - DB_CONNECTION=sqlite
+      - APP_URL=http://localhost:8000
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=enews
+      - DB_USERNAME=enews
+      - DB_PASSWORD=enews
+    networks:
+      - laravel
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql:8.0
+    container_name: laravel_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: enews
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_PASSWORD: enews
+      MYSQL_USER: enews
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3307:3306"
     networks:
       - laravel
 
-  # Optional: MySQL Database (if you want to use MySQL instead of SQLite)
-  # Uncomment this section if needed
-  # mysql:
-  #   image: mysql:8.0
-  #   container_name: laravel_mysql
-  #   restart: unless-stopped
-  #   environment:
-  #     MYSQL_DATABASE: laravel
-  #     MYSQL_ROOT_PASSWORD: secret
-  #     MYSQL_PASSWORD: secret
-  #     MYSQL_USER: laravel
-  #   volumes:
-  #     - mysql_data:/var/lib/mysql
-  #   ports:
-  #     - "3306:3306"
-  #   networks:
-  #     - laravel
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: laravel_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: enews
+      PMA_PASSWORD: enews
+    ports:
+      - "8081:80"
+    networks:
+      - laravel
+    depends_on:
+      - mysql
 
 networks:
   laravel:
     driver: bridge
 
-# volumes:
-#   mysql_data:
-#     driver: local
+volumes:
+  mysql_data:
+    driver: local

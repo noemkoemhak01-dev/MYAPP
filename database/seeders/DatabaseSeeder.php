@@ -10,16 +10,34 @@ class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $admin = User::firstOrCreate([
+            'email' => 'kimhak029@gmail.com',
+        ], [
+            'name' => 'Admin',
+            'role' => 'admin',
+            'password' => bcrypt('password'),
         ]);
+
+        $user = User::firstOrCreate([
+            'email' => 'hakk96676@gmail.com',
+        ], [
+            'name' => 'User',
+            'role' => 'user',
+            'password' => bcrypt('password'),
+        ]);
+
+        $this->call([
+            FeedTopicSeeder::class,
+            FeedPostSeeder::class,
+            BookmarkSeeder::class,
+            DashboardSeeder::class,
+            NotificationSeeder::class,
+        ]);
+
+        // Guarantee demo ownership alignment
+        $admin->feedPosts()->update(['user_id' => $admin->id]);
+        $user->bookmarks()->update(['user_id' => $user->id]);
     }
 }
